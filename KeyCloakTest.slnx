@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="KeyCloakTest.Tests/KeyCloakTest.Tests.csproj" />
+  <Project Path="KeyCloakTest/KeyCloakTest.csproj" />
+</Solution>

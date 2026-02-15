@@ -1,0 +1,70 @@
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    container_name: keycloak-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KEYCLOAK_DB_NAME}
+      POSTGRES_USER: ${KEYCLOAK_DB_USER}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${KEYCLOAK_DB_USER} -d ${KEYCLOAK_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: ${KEYCLOAK_DB_NAME}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import:ro
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/opt/keycloak/bin/kc.sh", "show-config"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: KeyCloakTest/Dockerfile
+    container_name: keycloak-auth-demo-api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Auth__Authority: http://keycloak:8080/realms/auth-demo
+      Auth__RequireHttpsMetadata: "false"
+      Auth__ValidAudiences__0: auth-demo-api
+      Auth__ApiClientId: auth-demo-api
+      Auth__SwaggerClientId: auth-demo-swagger
+      Cors__AllowedOrigins__0: http://localhost:5083
+      Cors__AllowedOrigins__1: http://localhost:8080
+      UseHttpsRedirection: "false"
+    ports:
+      - "5083:8080"
+    depends_on:
+      keycloak:
+        condition: service_started
+
+volumes:
+  keycloak-db-data:

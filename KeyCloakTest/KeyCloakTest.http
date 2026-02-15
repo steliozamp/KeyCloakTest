@@ -1,0 +1,55 @@
+@ApiBaseUrl = http://localhost:5083
+@KeycloakRealmUrl = http://localhost:8080/realms/auth-demo
+@ReadClientId = auth-demo-service-read
+@ReadClientSecret = demo-read-secret
+@WriteClientId = auth-demo-service-write
+@WriteClientSecret = demo-write-secret
+
+### Public endpoint (no token)
+GET {{ApiBaseUrl}}/api/demo/public
+Accept: application/json
+
+### Protected endpoint without token (should return 401)
+GET {{ApiBaseUrl}}/api/demo/me
+Accept: application/json
+
+### Read-only service token
+# @name readTokenRequest
+POST {{KeycloakRealmUrl}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{ReadClientId}}&client_secret={{ReadClientSecret}}
+
+###
+@ReadAccessToken = {{readTokenRequest.response.body.access_token}}
+GET {{ApiBaseUrl}}/api/demo/reports
+Authorization: Bearer {{ReadAccessToken}}
+Accept: application/json
+
+### Write endpoint with read-only token (should return 403)
+POST {{ApiBaseUrl}}/api/demo/reports
+Authorization: Bearer {{ReadAccessToken}}
+Content-Type: application/json
+
+{
+  "name": "monthly-report",
+  "description": "Read-only token should fail here."
+}
+
+### Write-capable service token
+# @name writeTokenRequest
+POST {{KeycloakRealmUrl}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=client_credentials&client_id={{WriteClientId}}&client_secret={{WriteClientSecret}}
+
+###
+@WriteAccessToken = {{writeTokenRequest.response.body.access_token}}
+POST {{ApiBaseUrl}}/api/demo/reports
+Authorization: Bearer {{WriteAccessToken}}
+Content-Type: application/json
+
+{
+  "name": "monthly-report",
+  "description": "Write token should succeed."
+}

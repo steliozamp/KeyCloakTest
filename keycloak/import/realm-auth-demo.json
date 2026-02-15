@@ -1,0 +1,227 @@
+{
+  "realm": "auth-demo",
+  "enabled": true,
+  "displayName": "Auth Demo Realm",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "user",
+        "description": "Basic authenticated user"
+      },
+      {
+        "name": "manager",
+        "description": "Manager role"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator role"
+      }
+    ]
+  },
+  "clientScopes": [
+    {
+      "name": "api.read",
+      "description": "Read access to protected API resources",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "api.write",
+      "description": "Write access to protected API resources",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "auth-demo-api",
+      "name": "Auth Demo API",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "bearerOnly": true
+    },
+    {
+      "clientId": "auth-demo-swagger",
+      "name": "Auth Demo Swagger UI",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": false,
+      "redirectUris": [
+        "http://localhost:5083/swagger/oauth2-redirect.html"
+      ],
+      "webOrigins": [
+        "http://localhost:5083"
+      ],
+      "defaultClientScopes": [
+        "web-origins",
+        "roles",
+        "profile",
+        "email",
+        "api.read"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "api.write"
+      ],
+      "protocolMappers": [
+        {
+          "name": "audience-auth-demo-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "auth-demo-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "auth-demo-service-read",
+      "name": "Auth Demo Service Read Client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "demo-read-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "roles",
+        "profile",
+        "email",
+        "api.read"
+      ],
+      "optionalClientScopes": [
+        "api.write"
+      ],
+      "protocolMappers": [
+        {
+          "name": "audience-auth-demo-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "auth-demo-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "auth-demo-service-write",
+      "name": "Auth Demo Service Write Client",
+      "protocol": "openid-connect",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "demo-write-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false,
+      "defaultClientScopes": [
+        "roles",
+        "profile",
+        "email",
+        "api.read",
+        "api.write"
+      ],
+      "protocolMappers": [
+        {
+          "name": "audience-auth-demo-api",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "auth-demo-api",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "firstName": "Alice",
+      "lastName": "Reader",
+      "email": "alice@example.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "alice123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    },
+    {
+      "username": "bob",
+      "enabled": true,
+      "firstName": "Bob",
+      "lastName": "Manager",
+      "email": "bob@example.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "bob123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "manager"
+      ]
+    },
+    {
+      "username": "carol",
+      "enabled": true,
+      "firstName": "Carol",
+      "lastName": "Admin",
+      "email": "carol@example.local",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "carol123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "user",
+        "manager",
+        "admin"
+      ]
+    }
+  ]
+}
