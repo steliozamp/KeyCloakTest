@@ -30,10 +30,14 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_ENABLED: "true"
+      # Uncomment after running: npm run build-keycloak-theme in sporty-frontend-client
+      # KC_SPI_THEME_DEFAULT_LOGIN: sporty
     ports:
       - "8080:8080"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import:ro
+      # Uncomment after building the theme JAR (npm run build-keycloak-theme):
+      # - /Users/steliozamp/Desktop/Sporty/sporty-frontend-client/dist_keycloak/sporty-keycloak-theme.jar:/opt/keycloak/providers/sporty-theme.jar:ro
     depends_on:
       keycloak-db:
         condition: service_healthy
